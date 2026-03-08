@@ -72,48 +72,48 @@ INSERT INTO public.users (id, created_at, first_name, last_name) VALUES
 -- ============================================================================
 -- INSERT CONTRIBUTIONS
 -- ============================================================================
--- Alice's contributions
-INSERT INTO public.contribution (id, user_id, description, photo_path, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440001'::uuid, '550e8400-e29b-41d4-a716-446655440001'::uuid, 
+-- Alice's contributions (to Durham sites)
+INSERT INTO public.contribution (id, user_id, site_id, description, photo_path, created_at) VALUES
+  ('650e8400-e29b-41d4-a716-446655440001'::uuid, '550e8400-e29b-41d4-a716-446655440001'::uuid, 'f1111111-1111-1111-1111-111111111111'::uuid, 
    'Beautiful sunset view from the castle terrace. The evening light perfectly illuminates the Norman architecture.', 
    '/photos/durham_castle_sunset.jpg', now()),
-  ('650e8400-e29b-41d4-a716-446655440002'::uuid, '550e8400-e29b-41d4-a716-446655440001'::uuid,
+  ('650e8400-e29b-41d4-a716-446655440002'::uuid, '550e8400-e29b-41d4-a716-446655440001'::uuid, 'f1111111-1111-1111-1111-111111111112'::uuid,
    'Detail of the intricate stonework on the cathedral facade. Remarkable medieval craftsmanship.',
    '/photos/cathedral_stonework.jpg', now());
 
--- Bob's contributions
-INSERT INTO public.contribution (id, user_id, description, photo_path, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440003'::uuid, '550e8400-e29b-41d4-a716-446655440002'::uuid,
+-- Bob's contributions (to Edinburgh sites)
+INSERT INTO public.contribution (id, user_id, site_id, description, photo_path, created_at) VALUES
+  ('650e8400-e29b-41d4-a716-446655440003'::uuid, '550e8400-e29b-41d4-a716-446655440002'::uuid, 'f2222222-2222-2222-2222-222222222222'::uuid,
    'Street performers on the Royal Mile during festival season. Vibrant cultural atmosphere.',
    '/photos/royal_mile_performers.jpg', now()),
-  ('650e8400-e29b-41d4-a716-446655440004'::uuid, '550e8400-e29b-41d4-a716-446655440002'::uuid,
+  ('650e8400-e29b-41d4-a716-446655440004'::uuid, '550e8400-e29b-41d4-a716-446655440002'::uuid, 'f2222222-2222-2222-2222-222222222223'::uuid,
    'Edinburgh Castle at night with atmospheric lighting. One of Scotland''s most magnificent views.',
    '/photos/edinburgh_castle_night.jpg', now());
 
--- Catherine's contributions
-INSERT INTO public.contribution (id, user_id, description, photo_path, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440005'::uuid, '550e8400-e29b-41d4-a716-446655440003'::uuid,
+-- Catherine's contributions (to Kuala Lumpur sites)
+INSERT INTO public.contribution (id, user_id, site_id, description, photo_path, created_at) VALUES
+  ('650e8400-e29b-41d4-a716-446655440005'::uuid, '550e8400-e29b-41d4-a716-446655440003'::uuid, 'f3333333-3333-3333-3333-333333333333'::uuid,
    'The Petronas Twin Towers reflecting the modern development of Kuala Lumpur. Architectural marvel.',
    '/photos/petronas_towers.jpg', now()),
-  ('650e8400-e29b-41d4-a716-446655440006'::uuid, '550e8400-e29b-41d4-a716-446655440003'::uuid,
+  ('650e8400-e29b-41d4-a716-446655440006'::uuid, '550e8400-e29b-41d4-a716-446655440003'::uuid, 'f3333333-3333-3333-3333-333333333334'::uuid,
    'Intricate Islamic tilework at Masjid Jamek. Exceptional geometric patterns and craftsmanship.',
    '/photos/masjid_jamek_detail.jpg', now());
 
--- David's contributions
-INSERT INTO public.contribution (id, user_id, description, photo_path, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440007'::uuid, '550e8400-e29b-41d4-a716-446655440004'::uuid,
+-- David's contributions (to New York sites)
+INSERT INTO public.contribution (id, user_id, site_id, description, photo_path, created_at) VALUES
+  ('650e8400-e29b-41d4-a716-446655440007'::uuid, '550e8400-e29b-41d4-a716-446655440004'::uuid, 'f4444444-4444-4444-4444-444444444444'::uuid,
    'Statue of Liberty at sunrise with ferry boats in background. Iconic American landmark.',
    '/photos/statue_liberty_sunrise.jpg', now()),
-  ('650e8400-e29b-41d4-a716-446655440008'::uuid, '550e8400-e29b-41d4-a716-446655440004'::uuid,
+  ('650e8400-e29b-41d4-a716-446655440008'::uuid, '550e8400-e29b-41d4-a716-446655440004'::uuid, 'f4444444-4444-4444-4444-444444444445'::uuid,
    'The Metropolitan Museum of Art''s classical facade. World-class repository of human artistic achievement.',
    '/photos/met_museum_facade.jpg', now());
 
--- Emma's contributions
-INSERT INTO public.contribution (id, user_id, description, photo_path, created_at) VALUES
-  ('650e8400-e29b-41d4-a716-446655440009'::uuid, '550e8400-e29b-41d4-a716-446655440005'::uuid,
+-- Emma's contributions (to New York sites)
+INSERT INTO public.contribution (id, user_id, site_id, description, photo_path, created_at) VALUES
+  ('650e8400-e29b-41d4-a716-446655440009'::uuid, '550e8400-e29b-41d4-a716-446655440005'::uuid, 'f4444444-4444-4444-4444-444444444447'::uuid,
    'Brooklyn Bridge cables creating geometric patterns against sunset sky. Engineering and art combined.',
    '/photos/brooklyn_bridge_sunset.jpg', now()),
-  ('650e8400-e29b-41d4-a716-446655440010'::uuid, '550e8400-e29b-41d4-a716-446655440005'::uuid,
+  ('650e8400-e29b-41d4-a716-446655440010'::uuid, '550e8400-e29b-41d4-a716-446655440005'::uuid, 'f4444444-4444-4444-4444-444444444446'::uuid,
    'Times Square neon lights reflecting on wet pavement after rain. Urban energy and vibrancy.',
    '/photos/times_square_rain.jpg', now());
 

@@ -2,13 +2,24 @@
 
 ## API Requirements
 A Flask API to retrieve the necessary data from the database.
-Database setup for Supabase schema can be found in /sql.
+Database setup for Supabase schema can be found in /database.
 No authentication implemented at this stage, in production auth tokens will be used.
 
 ## Base URL
 ```
 http://localhost:5000/api
 ```
+
+## Endpoints Summary
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/cities` | Retrieve all cities |
+| GET | `/cultures` | Retrieve all cultural categories |
+| GET | `/sites/city/<city_name>` | Retrieve all sites in a specific city |
+| GET | `/contributions/<site_id>` | Retrieve the 5 most recent contributions for a site |
+| POST | `/contributions` | Create a new contribution for a site |
+| POST | `/sites` | Create a new cultural site |
 
 ---
 
@@ -125,14 +136,14 @@ GET http://localhost:5000/api/contributions/523e4567-e89b-12d3-a456-426614174000
     "_id": "723e4567-e89b-12d3-a456-426614174000",
     "description": "Beautiful place to visit in autumn",
     "photo_path": "user_photos/photo_001.jpg",
-    "user_name": "Alice Smith",
+    "user_id": "550e8400-e29b-41d4-a716-446655440001",
     "created_at": "2026-03-05T14:32:10"
   },
   {
     "_id": "823e4567-e89b-12d3-a456-426614174000",
     "description": "Amazing historical details preserved",
     "photo_path": "user_photos/photo_002.jpg",
-    "user_name": "Bob Johnson",
+    "user_id": "550e8400-e29b-41d4-a716-446655440002",
     "created_at": "2026-03-04T09:15:22"
   }
 ]
@@ -153,6 +164,7 @@ Content-Type: application/json
 
 {
   "site_id": "523e4567-e89b-12d3-a456-426614174000",
+  "user_id": "550e8400-e29b-41d4-a716-446655440001",
   "description": "Stunning architectural details",
   "photo_path": "user_photos/my_photo.jpg"
 }
@@ -164,7 +176,7 @@ Content-Type: application/json
   "_id": "923e4567-e89b-12d3-a456-426614174000",
   "description": "Stunning architectural details",
   "photo_path": "user_photos/my_photo.jpg",
-  "user_name": "John Doe",
+  "user_id": "550e8400-e29b-41d4-a716-446655440001",
   "created_at": "2026-03-07T10:45:30"
 }
 ```

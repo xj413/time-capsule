@@ -152,7 +152,8 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
 
       // If within 50km, just show the existing capsule
       if (minDistance < 50 && closestCapsule) {
-        setTimeout(() => setSelectedCapsule(closestCapsule), 600);
+        // We inject the isUserLocation flag into the existing capsule so the Video button still renders!
+        setTimeout(() => setSelectedCapsule({...closestCapsule, isUserLocation: true}), 600);
         return;
       }
 

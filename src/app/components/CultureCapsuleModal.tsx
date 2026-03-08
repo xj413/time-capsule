@@ -10,7 +10,23 @@ import {
   Users, 
   Sparkles, 
   Image as ImageIcon, 
-import { MapPin, ArrowRight, X, Play, Square, Mic, Globe, Clock, Users, Sun, PenTool, Sparkles, Navigation, ImagePlus, UploadCloud, Video } from 'lucide-react';
+  ImagePlus,
+  Coffee, 
+  Mic, 
+  Play, 
+  Square,
+  UploadCloud, 
+  PenTool, 
+  User, 
+  MessageSquare, 
+  HelpCircle, 
+  CheckCircle2, 
+  Send,
+  Video,
+  ArrowRight,
+  Navigation,
+  Globe
+} from 'lucide-react';
 
 interface CultureCapsuleModalProps {
   capsule: CultureCapsule;

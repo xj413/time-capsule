@@ -423,10 +423,10 @@ export function CultureCapsuleModal({
 
               {/* My Location: API Video Recorder */}
               {capsule.isUserLocation && (
-                <div className="bg-gradient-to-br from-indigo-900/40 to-slate-800 p-5 rounded-2xl border border-indigo-500/30 mb-8">
+                <div className="bg-gradient-to-br from-amber-900/40 to-slate-800 p-5 rounded-2xl border border-amber-500/30 mb-8">
                   <div className="flex justify-between items-center mb-4">
                     <h4 className="text-white font-bold flex items-center gap-2">
-                      <Video className="w-5 h-5 text-indigo-400" /> Live Location Feed
+                      <Video className="w-5 h-5 text-amber-400" /> Live Location Feed
                     </h4>
                     {isVideoRecording && (
                       <span className="flex items-center gap-2 text-red-400 text-xs font-bold animate-pulse">
@@ -435,7 +435,7 @@ export function CultureCapsuleModal({
                     )}
                   </div>
                   
-                  <p className="text-indigo-200/70 text-sm mb-4">
+                  <p className="text-amber-200/70 text-sm mb-4">
                     Press and hold the button below to stream a live video feed from your current location directly to the globe backend.
                   </p>
                   
@@ -448,7 +448,7 @@ export function CultureCapsuleModal({
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${
                       isVideoRecording 
                       ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50' 
-                      : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:scale-[1.02] hover:shadow-indigo-500/50'
+                      : 'bg-amber-600 text-slate-900 hover:bg-amber-500 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(217,119,6,0.4)]'
                     }`}
                   >
                     <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />

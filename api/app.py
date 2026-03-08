@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from db import get_db
 from utils.errors import APIError, ValidationError, NotFoundError, DatabaseError, error_response
 
 app = Flask(__name__)
+CORS(app)
 
 @app.errorhandler(APIError)
 def handle_api_error(error):
@@ -51,7 +53,7 @@ def get_user_by_id(user_id):
     
     try:
         cur = conn.cursor()
-        cur.execute("SELECT id, first_name, last_name FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT id, first_name, last_name FROM users WHERE id = ?", (user_id,))
         row = cur.fetchone()
         cur.close()
         conn.close()
@@ -133,11 +135,11 @@ def get_sites_by_city(city_name):
         cur = conn.cursor()
         query = """
             SELECT s.id, s.name, s.summary, c.name as culture_name, cy.name as city_name,
-                   ST_X(s.location) as longitude, ST_Y(s.location) as latitude
+                   s.longitude, s.latitude
             FROM site s
             JOIN culture c ON s.culture_id = c.id
             JOIN city cy ON s.city_id = cy.id
-            WHERE LOWER(cy.name) = LOWER(%s)
+            WHERE LOWER(cy.name) = LOWER(?)
             ORDER BY s.name
         """
         cur.execute(query, (city_name,))
@@ -178,14 +180,14 @@ def get_contributions_by_site(site_id):
     try:
         cur = conn.cursor()
         
-        cur.execute("SELECT id FROM site WHERE id = %s", (site_id,))
+        cur.execute("SELECT id FROM site WHERE id = ?", (site_id,))
         if not cur.fetchone():
             raise NotFoundError(f"Site with ID '{site_id}' not found")
         
         query = """
             SELECT c.id, c.description, c.photo_path, c.user_id, c.created_at
             FROM contribution c
-            WHERE c.site_id = %s
+            WHERE c.site_id = ?
             ORDER BY c.created_at DESC
             LIMIT 5
         """
@@ -235,17 +237,17 @@ def create_contribution():
     try:
         cur = conn.cursor()
         
-        cur.execute("SELECT id FROM site WHERE id = %s", (site_id,))
+        cur.execute("SELECT id FROM site WHERE id = ?", (site_id,))
         if not cur.fetchone():
             raise NotFoundError(f"Site with ID '{site_id}' not found")
         
-        cur.execute("SELECT id FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT id FROM users WHERE id = ?", (user_id,))
         if not cur.fetchone():
             raise NotFoundError(f"User with ID '{user_id}' not found")
         
         query = """
             INSERT INTO contribution (user_id, site_id, description, photo_path)
-            VALUES (%s, %s, %s, %s)
+            VALUES (?, ?, ?, ?)
             RETURNING id, user_id, description, photo_path, created_at
         """
         cur.execute(query, (user_id, site_id, description, photo_path))
@@ -296,32 +298,31 @@ def create_site():
     try:
         cur = conn.cursor()
         
-        cur.execute("SELECT id FROM city WHERE name = %s", (city_name,))
+        cur.execute("SELECT id FROM city WHERE name = ?", (city_name,))
         city_row = cur.fetchone()
         if not city_row:
             raise NotFoundError(f"City '{city_name}' not found")
         city_id = city_row[0]
         
-        cur.execute("SELECT id FROM culture WHERE name = %s", (culture_name,))
+        cur.execute("SELECT id FROM culture WHERE name = ?", (culture_name,))
         culture_row = cur.fetchone()
         if not culture_row:
             raise NotFoundError(f"Culture '{culture_name}' not found")
         culture_id = culture_row[0]
         
         query = """
-            INSERT INTO site (name, summary, culture_id, city_id, location)
-            VALUES (%s, %s, %s, %s, ST_GeomFromText(%s, 4326))
-            RETURNING id, name, summary, culture_id, city_id, ST_X(location) as longitude, ST_Y(location) as latitude
+            INSERT INTO site (name, summary, culture_id, city_id, latitude, longitude)
+            VALUES (?, ?, ?, ?, ?, ?)
+            RETURNING id, name, summary, culture_id, city_id, longitude, latitude
         """
-        point_wkt = f"POINT({longitude} {latitude})"
-        cur.execute(query, (name, summary, culture_id, city_id, point_wkt))
+        cur.execute(query, (name, summary, culture_id, city_id, latitude, longitude))
         row = cur.fetchone()
         conn.commit()
         
-        cur.execute("SELECT name FROM culture WHERE id = %s", (culture_id,))
+        cur.execute("SELECT name FROM culture WHERE id = ?", (culture_id,))
         culture_name_result = cur.fetchone()[0]
         
-        cur.execute("SELECT name FROM city WHERE id = %s", (city_id,))
+        cur.execute("SELECT name FROM city WHERE id = ?", (city_id,))
         city_name_result = cur.fetchone()[0]
         
         cur.close()

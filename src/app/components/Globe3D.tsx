@@ -49,6 +49,42 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
     }
   }, []);
 
+  // Convert plain capital data into CultureCapsule objects
+  const capitalCapsules: CultureCapsule[] = capitalLabels.map(c => {
+    // Attempt to extract city and country if stored as "City, Country"
+    const parts = c.name.split(', ');
+    const name = parts[0];
+    const country = parts.length > 1 ? parts[1] : '';
+    
+    return {
+      id: `capital-${name.toLowerCase().replace(/[^a-z0-9]/g, '-')}`,
+      name: name,
+      country: country,
+      lat: c.lat,
+      lng: c.lng,
+      timelinePeriod: "Capital City",
+      capsuleColor: "#10B981", // Emerald green for capitals
+      isCapital: true,
+      perspectives: [
+        {
+          role: "Global Citizen",
+          summary: `This is the capital city of ${country || 'this nation'}. It serves as the political and cultural heart of the country.`
+        }
+      ],
+      lifeTodayCards: [
+        {
+          category: "Community Capture",
+          title: "Be the First to Share",
+          content: "No local insights have been recorded for this capital yet. If you live here or have visited, share what life looks like around you!"
+        }
+      ],
+      images: [],
+      stories: [],
+      voiceNotes: [],
+      questions: []
+    };
+  });
+
   // Calculate interaction volume for a capsule
   const getInteractionVolume = (capsule: CultureCapsule) => {
     return capsule.stories.length + capsule.voiceNotes.length + capsule.questions.length;
@@ -243,22 +279,24 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           // Data pins for hover interactions
           pointsData={[
             ...cultureCapsules,
-            ...cultureCapsules.map(c => ({ ...c, isHitArea: true }))
+            ...capitalCapsules,
+            ...cultureCapsules.map(c => ({ ...c, isHitArea: true })),
+            ...capitalCapsules.map(c => ({ ...c, isHitArea: true }))
           ]}
           pointLat="lat"
           pointLng="lng"
           pointColor={(d: any) => d.isHitArea ? 'rgba(0,0,0,0.01)' : d.capsuleColor}
           pointAltitude={(d: any) => d.isHitArea ? 0.011 : 0.01}
-          pointRadius={(d: any) => d.isHitArea ? 2.5 : 0.4}
+          pointRadius={(d: any) => d.isHitArea ? 2.5 : d.isCapital ? 0.3 : 0.4}
           pointsMerge={false}
           pointLabel={(d: any) => `
             <div class="bg-gray-900/95 border border-[${d.capsuleColor}]/30 p-3 rounded-xl shadow-2xl backdrop-blur-sm -mt-2 pointer-events-none">
               <div class="flex items-center gap-2 mb-1">
                 <svg class="w-4 h-4" style="color: ${d.capsuleColor}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                <span class="font-bold text-white text-sm">${d.name}, ${d.country}</span>
+                <span class="font-bold text-white text-sm">${d.name}${d.isCapital ? '' : (d.country ? ', ' + d.country : '')}</span>
               </div>
               <div class="text-xs text-gray-400">
-                ${d.timelinePeriod}
+                ${d.timelinePeriod || 'Capital City'}
               </div>
               <div class="text-[10px] text-amber-300/80 mt-2 border-t border-gray-700/50 pt-1 uppercase tracking-wider font-bold">
                 Click to explore capsule
@@ -304,13 +342,13 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           ringMaxRadius={(d: any) => Math.max(2, getInteractionVolume(d) * 1.5)}
           ringPropagationSpeed={(d: any) => Math.max(1, getInteractionVolume(d) * 0.5)}
           ringRepeatPeriod={(d: any) => Math.max(300, 1500 - getInteractionVolume(d) * 200)}
-          labelsData={[...countryLabels, ...oceanLabels, ...capitalLabels]}
+          labelsData={[...countryLabels, ...oceanLabels]}
           labelLat={(d: any) => d.lat}
           labelLng={(d: any) => d.lng}
           labelText={(d: any) => d.name}
-          labelSize={(d: any) => d.isOcean ? 2.5 : d.isCapital ? 0.8 : 1.2}
-          labelDotRadius={(d: any) => d.isOcean ? 0 : d.isCapital ? 0.2 : 0.4}
-          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : d.isCapital ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.7)'}
+          labelSize={(d: any) => d.isOcean ? 2.5 : 1.2}
+          labelDotRadius={(d: any) => d.isOcean ? 0 : 0.4}
+          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.7)'}
           labelResolution={2}
         />
 

@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS public.user_contribution_interest CASCADE;
+DROP TABLE IF EXISTS public.user_culture_interest CASCADE;
+DROP TABLE IF EXISTS public.user_site_interest CASCADE;
+DROP TABLE IF EXISTS public.user_city_interest CASCADE;
+DROP TABLE IF EXISTS public.contribution CASCADE;
+DROP TABLE IF EXISTS public.users CASCADE;
+DROP TABLE IF EXISTS public.culture CASCADE;
+DROP TABLE IF EXISTS public.site CASCADE;
+DROP TABLE IF EXISTS public.city CASCADE;

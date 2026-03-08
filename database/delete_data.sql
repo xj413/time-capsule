@@ -1,0 +1,9 @@
+delete from public.users;
+delete from public.contribution;
+delete from public.site;
+delete from public.city;
+delete from public.culture;
+delete from public.user_contribution_interest;
+delete from public.user_site_interest;
+delete from public.user_city_interest;
+delete from public.user_culture_interest;

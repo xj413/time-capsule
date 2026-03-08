@@ -392,10 +392,10 @@ export function CultureCapsuleModal({
                         
                         {/* Fake Waveform */}
                         <div className="flex items-end gap-[2px] h-8 mb-3 w-full">
-                          {Array.from({ length: 40 }).map((_, i) => (
+                          {Array(40).fill(0).map((_, i) => (
                             <div 
                               key={i} 
-                              className={`flex-1 rounded-sm ${playingId === vn.id ? 'bg-amber-300 animate-pulse' : 'bg-amber-400'} ${i < 15 ? 'opacity-100' : 'opacity-30'}`}
+                              className={`flex-1 rounded-sm ${isPlayingId === vn.id ? 'bg-amber-300 animate-pulse' : 'bg-amber-400'} ${i < 15 ? 'opacity-100' : 'opacity-30'}`}
                               style={{ 
                                 height: `${Math.max(10, Math.sin(i * 0.5) * 50 + 50)}%`,
                                 animationDelay: `${i * 0.05}s`

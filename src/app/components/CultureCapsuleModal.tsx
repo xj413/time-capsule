@@ -454,6 +454,20 @@ export function CultureCapsuleModal({
                     <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />
                     {isVideoRecording ? 'Release to Stop & Send' : 'Hold to Record & Broadcast'}
                   </button>
+
+                  {/* Simulated AI Camera Analysis */}
+                  {isVideoRecording && (
+                    <div className="mt-4 p-4 bg-slate-900/80 rounded-xl border border-indigo-500/40 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+                        <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest">AI Vision Active</span>
+                      </div>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        <span className="text-white/50 italic mr-2">&gt; Analyzing feed...</span>
+                        "Camera currently pointing at a busy street intersection. Identifying bright sunlight, moderate pedestrian traffic, and several historic storefronts. Detecting high energy levels in the surrounding environment."
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 

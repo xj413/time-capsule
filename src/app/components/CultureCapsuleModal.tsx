@@ -283,13 +283,13 @@ export function CultureCapsuleModal({
                         handlePlayVoiceNote(`history-tts-${activePerspectiveIndex}`, capsule.perspectives[activePerspectiveIndex].summary);
                       }}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                        playingId === `history-tts-${activePerspectiveIndex}`
+                        isPlayingId === `history-tts-${activePerspectiveIndex}`
                         ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.5)]' 
                         : 'bg-slate-700/50 hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-400 opacity-50 group-hover:opacity-100'
                       }`}
-                      title={playingId === `history-tts-${activePerspectiveIndex}` ? "Stop playback" : "Read aloud"}
+                      title={isPlayingId === `history-tts-${activePerspectiveIndex}` ? "Stop playback" : "Read aloud"}
                     >
-                      {playingId === `history-tts-${activePerspectiveIndex}` ? (
+                      {isPlayingId === `history-tts-${activePerspectiveIndex}` ? (
                         <Square className="w-3 h-3 fill-current" />
                       ) : (
                         <Play className="w-4 h-4 ml-0.5 fill-current" />
@@ -377,15 +377,15 @@ export function CultureCapsuleModal({
                           <button 
                             onClick={() => handlePlayVoiceNote(vn.id, vn.transcription)}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              playingId === vn.id 
-                              ? 'bg-amber-600 text-white shadow-[0_0_15px_rgba(217,119,6,0.5)]' 
-                              : 'bg-amber-500 hover:bg-amber-400 text-black'
+                              isPlayingId === vn.id 
+                              ? 'bg-amber-600 text-slate-900 shadow-[0_0_15px_rgba(217,119,6,0.4)]' 
+                              : 'bg-slate-700 hover:bg-amber-500/20 text-white hover:text-amber-400'
                             }`}
                           >
-                            {playingId === vn.id ? (
+                            {isPlayingId === vn.id ? (
                               <Square className="w-4 h-4 fill-current" />
                             ) : (
-                              <Play className="w-5 h-5 ml-1 fill-current" />
+                              <Play className="w-4 h-4 ml-1 fill-current" />
                             )}
                           </button>
                         </div>

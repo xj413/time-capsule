@@ -448,7 +448,7 @@ export function CultureCapsuleModal({
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${
                       isVideoRecording 
                       ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50' 
-                      : 'bg-amber-600 text-slate-900 hover:bg-amber-500 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(217,119,6,0.4)]'
+                      : 'bg-amber-500 text-slate-900 hover:bg-amber-400 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]'
                     }`}
                   >
                     <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />

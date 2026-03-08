@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CultureCapsule } from '../models/cultureCapsule';
 import { 
   X, 
@@ -31,10 +31,69 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
   const [activeTab, setActiveTab] = useState<'history' | 'life' | 'community'>('history');
   const [activePerspectiveIndex, setActivePerspectiveIndex] = useState(0);
 
-  // Reset perspective when tab changes or capsule changes
-  React.useEffect(() => {
+  // Speech to Text state
+  const [localVoiceNotes, setLocalVoiceNotes] = useState(capsule.voiceNotes);
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcriptionText, setTranscriptionText] = useState("");
+  const recognitionRef = useRef<any>(null);
+
+  // Reset perspective and notes when tab changes or capsule changes
+  useEffect(() => {
     setActivePerspectiveIndex(0);
+    setLocalVoiceNotes(capsule.voiceNotes);
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+    }
   }, [capsule.id, activeTab]);
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setIsRecording(false);
+    } else {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        alert("Speech Recognition API is not supported in this browser. Please use Chrome, Safari, or Edge.");
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event: any) => {
+        let currentTranscript = "";
+        for (let i = 0; i < event.results.length; i++) {
+          currentTranscript += event.results[i][0].transcript;
+        }
+        setTranscriptionText(currentTranscript);
+      };
+      
+      recognition.onerror = () => setIsRecording(false);
+      recognition.onend = () => setIsRecording(false);
+      
+      setTranscriptionText("");
+      recognition.start();
+      recognitionRef.current = recognition;
+      setIsRecording(true);
+    }
+  };
+
+  const handleSaveVoiceNote = () => {
+    if (transcriptionText.trim()) {
+      const newNote = {
+        id: `vn-new-${Date.now()}`,
+        author: "Guest Traveler",
+        date: new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }),
+        transcription: transcriptionText,
+        duration: "0:00",
+        audioUrl: "",
+      };
+      setLocalVoiceNotes([newNote, ...localVoiceNotes]);
+      setTranscriptionText("");
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -206,14 +265,14 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
             <div className="space-y-8 animate-in fade-in duration-300">
               
               {/* Voice Notes */}
-              {capsule.voiceNotes.length > 0 && (
+              {localVoiceNotes.length > 0 && (
                 <div>
                   <div className="flex items-center gap-3 mb-4">
                     <Mic className="w-5 h-5 text-amber-400" />
                     <h3 className="text-xl font-bold text-white">Voice Notes</h3>
                   </div>
                   <div className="space-y-4">
-                    {capsule.voiceNotes.map(vn => (
+                    {localVoiceNotes.map(vn => (
                       <div key={vn.id} className="bg-slate-800/50 p-5 rounded-2xl border border-amber-600/20">
                         <div className="flex items-center gap-4 mb-4">
                           <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
@@ -250,14 +309,49 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
                 </div>
               )}
 
-              {/* Upload Voice Note Button */}
-              <button 
-                onClick={() => alert("ElevenLabs Integration Pending")}
-                className="w-full flex items-center justify-center gap-3 bg-slate-800 py-4 rounded-xl border border-amber-600/50 text-amber-400 hover:bg-slate-700 transition-colors font-medium"
-              >
-                <UploadCloud className="w-5 h-5" />
-                Upload Voice Note
-              </button>
+              {/* Voice Note Recorder (Speech-to-Text) */}
+              <div className="bg-slate-800 p-5 rounded-2xl border border-amber-600/30">
+                <div className="flex justify-between items-center mb-4">
+                  <h4 className="text-white font-bold flex items-center gap-2">
+                    <Mic className="w-4 h-4 text-amber-400" /> Share Your Experience (Live Audio)
+                  </h4>
+                  {isRecording && (
+                    <span className="flex items-center gap-2 text-red-400 text-xs font-bold animate-pulse">
+                      <div className="w-2 h-2 rounded-full bg-red-500" /> RECORDING
+                    </span>
+                  )}
+                </div>
+                
+                <textarea
+                  value={transcriptionText}
+                  onChange={(e) => setTranscriptionText(e.target.value)}
+                  placeholder="Click the microphone to start talking, or type your experience..."
+                  className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:border-amber-500 transition-colors mb-4 min-h-[80px]"
+                />
+                
+                <div className="flex gap-3">
+                  <button 
+                    onClick={toggleRecording}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border font-medium transition-colors ${
+                      isRecording 
+                      ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20' 
+                      : 'bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800'
+                    }`}
+                  >
+                    <Mic className={`w-5 h-5 ${isRecording ? 'animate-bounce' : ''}`} />
+                    {isRecording ? 'Stop Recording' : 'Start Recording'}
+                  </button>
+                  
+                  <button 
+                    onClick={handleSaveVoiceNote}
+                    disabled={!transcriptionText.trim() || isRecording}
+                    className="flex-1 flex items-center justify-center gap-2 bg-amber-500 text-slate-900 py-3 rounded-xl font-bold hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <UploadCloud className="w-5 h-5" />
+                    Save Voice Note
+                  </button>
+                </div>
+              </div>
 
               {/* Traveler Memories */}
               {capsule.stories.length > 0 && (

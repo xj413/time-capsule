@@ -273,23 +273,24 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           onGlobeReady={() => setGlobeReady(true)}
           onZoom={(pov: any) => setAltitude(pov.altitude)}
           
-          // Realistic textures
+          // Realistic textures with explicit performance bounds
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
           bumpImageUrl="https://unpkg.com/three-globe/example/img/earth-topology.png"
           backgroundImageUrl="https://unpkg.com/three-globe/example/img/night-sky.png"
+          showAtmosphere={true}
+          atmosphereColor="#3a228a"
+          atmosphereAltitude={0.1}
           
           // Data pins for hover interactions
           pointsData={[
             ...cultureCapsules,
-            ...capitalCapsules,
-            ...cultureCapsules.map(c => ({ ...c, isHitArea: true })),
-            ...capitalCapsules.map(c => ({ ...c, isHitArea: true }))
+            ...capitalCapsules
           ]}
           pointLat="lat"
           pointLng="lng"
-          pointColor={(d: any) => d.isHitArea ? 'rgba(0,0,0,0.01)' : d.capsuleColor}
-          pointAltitude={(d: any) => d.isHitArea ? 0.011 : 0.01}
-          pointRadius={(d: any) => d.isHitArea ? 2.5 : d.isCapital ? 0.3 : 0.4}
+          pointColor={(d: any) => d.capsuleColor}
+          pointAltitude={0.01}
+          pointRadius={(d: any) => d.isCapital ? 0.3 : 0.4}
           pointsMerge={false}
           pointLabel={(d: any) => `
             <div class="bg-gray-900/95 border border-[${d.capsuleColor}]/30 p-3 rounded-xl shadow-2xl backdrop-blur-sm -mt-2 pointer-events-none">
@@ -359,7 +360,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           }}
           labelDotRadius={(d: any) => d.isOcean ? 0 : 0.2}
           labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.75)'}
-          labelResolution={3}
+          labelResolution={2} // Reduced from 3 to improve render performance
         />
 
         {/* Top-Right Tools Menu */}

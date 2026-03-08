@@ -1,6 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import '../models/culture_capsule.dart';
 
-const List<CultureCapsule> cultureCapsules = [
+List<CultureCapsule> cultureCapsules = [
   CultureCapsule(
     id: "tokyo-japan",
     name: "Tokyo",
@@ -412,3 +414,79 @@ const List<CultureCapsule> cultureCapsules = [
     ],
   ),
 ];
+
+Future<void> fetchAndMergeCapsules() async {
+  try {
+    final citiesResponse = await http.get(Uri.parse('http://127.0.0.1:5000/api/cities'));
+    if (citiesResponse.statusCode != 200) return;
+    final cities = jsonDecode(citiesResponse.body);
+    
+    for (var city in cities) {
+      final sitesResponse = await http.get(Uri.parse('http://127.0.0.1:5000/api/sites/city/${city['name']}'));
+      if (sitesResponse.statusCode != 200) continue;
+      
+      final sites = jsonDecode(sitesResponse.body);
+      for (var site in sites) {
+        final siteId = site['id'];
+        final siteName = site['name'];
+        final siteLat = site['latitude'] ?? 0.0;
+        final siteLng = site['longitude'] ?? 0.0;
+        
+        int existingIndex = cultureCapsules.indexWhere((c) => c.name.toLowerCase() == siteName.toString().toLowerCase() || c.name.toLowerCase() == city['name'].toString().toLowerCase());
+        
+        List<Story> apiStories = [];
+        final contribResponse = await http.get(Uri.parse('http://127.0.0.1:5000/api/contributions/$siteId'));
+        if (contribResponse.statusCode == 200) {
+          final contribs = jsonDecode(contribResponse.body);
+          for (var contrib in contribs) {
+            String dateStr = contrib['created_at'].toString().split(' ').first;
+            apiStories.add(Story(
+              id: contrib['id'],
+              author: "Local Explorer",
+              date: dateStr,
+              text: contrib['description'],
+            ));
+          }
+        }
+        
+        if (existingIndex != -1) {
+          final current = cultureCapsules[existingIndex];
+          bool hasNew = false;
+          final updatedStories = List<Story>.from(current.stories);
+          for (var apiStory in apiStories) {
+            if (!current.stories.any((s) => s.id == apiStory.id)) {
+              updatedStories.add(apiStory);
+              hasNew = true;
+            }
+          }
+          if (hasNew) {
+            cultureCapsules[existingIndex] = current.copyWith(stories: updatedStories);
+          }
+        } else {
+          String shortSummary = "Modern Area";
+          if (site['summary'] != null && site['summary'].toString().length > 15) {
+            shortSummary = site['summary'].toString().substring(0, 15) + "...";
+          }
+          cultureCapsules.add(CultureCapsule(
+            id: siteId,
+            name: siteName,
+            country: city['name'],
+            lat: siteLat,
+            lng: siteLng,
+            aiSummary: site['summary'] ?? "AI Summary for $siteName...",
+            lifeTodaySummary: "Life today in $siteName...",
+            images: ["https://images.unsplash.com/photo-1541339907198-e08756dedf3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
+            stories: apiStories,
+            voiceNotes: [],
+            questions: [],
+            timelinePeriod: shortSummary,
+            capsuleColor: "#4A90E2",
+          ));
+        }
+      }
+    }
+  } catch (e) {
+    print("Error fetching backend data: $e");
+  }
+}
+

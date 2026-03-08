@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import 'models/culture_capsule.dart';
 import 'data/culture_capsules.dart';
@@ -44,6 +45,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   CultureCapsule? _selectedCapsule;
   late AnimationController _pulseController;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = true;
 
   @override
   void initState() {
@@ -52,11 +55,27 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
+    
+    _initAudio();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    await fetchAndMergeCapsules();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _initAudio() async {
+    await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+    await _audioPlayer.play(AssetSource('audio/ambient.mp3'));
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
@@ -262,6 +281,32 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _buildCorner(top: 0, right: 0, isTopRight: true),
           _buildCorner(bottom: 0, left: 0, isBottomLeft: true),
           _buildCorner(bottom: 0, right: 0, isBottomRight: true),
+
+          // Audio Toggle Button
+          Positioned(
+            top: 32,
+            right: isDesktop ? 32 : 24,
+            child: Material(
+              color: Colors.transparent,
+              child: IconButton(
+                icon: Icon(
+                  _isPlaying ? LucideIcons.volume2 : LucideIcons.volumeX,
+                  color: Colors.amber[200]!.withValues(alpha: 0.8),
+                  size: 28,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isPlaying = !_isPlaying;
+                    if (_isPlaying) {
+                      _audioPlayer.resume();
+                    } else {
+                      _audioPlayer.pause();
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
 
           // Modal Overlay
           if (_selectedCapsule != null)

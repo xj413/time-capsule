@@ -78,4 +78,36 @@ class CultureCapsule {
     required this.timelinePeriod,
     required this.capsuleColor,
   });
+
+  CultureCapsule copyWith({
+    String? id,
+    String? name,
+    String? country,
+    double? lat,
+    double? lng,
+    String? aiSummary,
+    String? lifeTodaySummary,
+    List<String>? images,
+    List<Story>? stories,
+    List<VoiceNote>? voiceNotes,
+    List<AskALocalQuestion>? questions,
+    String? timelinePeriod,
+    String? capsuleColor,
+  }) {
+    return CultureCapsule(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      country: country ?? this.country,
+      lat: lat ?? this.lat,
+      lng: lng ?? this.lng,
+      aiSummary: aiSummary ?? this.aiSummary,
+      lifeTodaySummary: lifeTodaySummary ?? this.lifeTodaySummary,
+      images: images ?? this.images,
+      stories: stories ?? this.stories,
+      voiceNotes: voiceNotes ?? this.voiceNotes,
+      questions: questions ?? this.questions,
+      timelinePeriod: timelinePeriod ?? this.timelinePeriod,
+      capsuleColor: capsuleColor ?? this.capsuleColor,
+    );
+  }
 }

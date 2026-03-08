@@ -711,7 +711,7 @@ export const cultureCapsules: CultureCapsule[] = [
         content: "Music is inescapable here. The latest Afrobeats tracks blast from tro-tros (minibuses) and roadside stalls constantly.",
       }
     ],
-    images: ["https://images.unsplash.com/photo-1599813298818-7b94921b369e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxBY2NyYSUyMEdoYW5hfGVufDF8fHx8MTc3Mjg5NTI1Mnww&ixlib=rb-4.1.0&q=80&w=1080"],
+    images: ["/accra.jpg"],
     stories: [
       {
         id: "20",

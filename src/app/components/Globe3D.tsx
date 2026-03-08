@@ -346,10 +346,10 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           labelLat={(d: any) => d.lat}
           labelLng={(d: any) => d.lng}
           labelText={(d: any) => d.name}
-          labelSize={(d: any) => d.isOcean ? 2.5 : 1.2}
-          labelDotRadius={(d: any) => d.isOcean ? 0 : 0.4}
-          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.7)'}
-          labelResolution={2}
+          labelSize={(d: any) => d.isOcean ? 2.5 : Math.max(0.3, Math.min(1.5, (d.area || 100000) / 1000000))}
+          labelDotRadius={(d: any) => d.isOcean ? 0 : 0.2}
+          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.65)'}
+          labelResolution={3}
         />
 
         {/* Top-Right Tools Menu */}

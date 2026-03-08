@@ -280,8 +280,8 @@ def create_site():
             "summary": row[2],
             "culture_name": culture_name_result,
             "city_name": city_name_result,
-            "latitude": float(row[5]) if row[5] else None,
-            "longitude": float(row[4]) if row[4] else None
+            "longitude": float(row[5]) if row[5] else None,
+            "latitude": float(row[6]) if row[6] else None
         }
         return jsonify(site), 201
     except NotFoundError:

@@ -303,28 +303,6 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           ringMaxRadius={(d: any) => Math.max(2, getInteractionVolume(d) * 1.5)}
           ringPropagationSpeed={(d: any) => Math.max(1, getInteractionVolume(d) * 0.5)}
           ringRepeatPeriod={(d: any) => Math.max(300, 1500 - getInteractionVolume(d) * 200)}
-          ringLabel={(d: any) => `
-            <div class="bg-gray-900/95 border border-[${d.capsuleColor}]/30 p-3 rounded-xl shadow-2xl backdrop-blur-sm -mt-2 pointer-events-none">
-              <div class="flex items-center gap-2 mb-1">
-                <svg class="w-4 h-4" style="color: ${d.capsuleColor}" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                <span class="font-bold text-white text-sm">${d.name}, ${d.country}</span>
-              </div>
-              <div class="text-xs text-gray-400">
-                ${d.timelinePeriod}
-              </div>
-              <div class="text-[10px] text-amber-300/80 mt-2 border-t border-gray-700/50 pt-1 uppercase tracking-wider font-bold">
-                Click to explore capsule
-              </div>
-            </div>
-          `}
-          onRingClick={(d: any) => {
-            if (d.isUserLocation) return;
-            setSelectedCapsule(d);
-            setSearchQuery('');
-            if (globeRef.current) {
-              globeRef.current.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.6 }, 1000);
-            }
-          }}
           labelsData={[...countryLabels, ...oceanLabels]}
           labelLat={(d: any) => d.lat}
           labelLng={(d: any) => d.lng}

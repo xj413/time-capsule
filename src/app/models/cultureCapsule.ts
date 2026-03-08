@@ -49,4 +49,6 @@ export interface CultureCapsule {
   stories: Story[];
   voiceNotes: VoiceNote[];
   questions: AskALocalQuestion[];
+  isUserLocation?: boolean;
+  isCapital?: boolean;
 }

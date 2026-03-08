@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import Globe from 'react-globe.gl';
 import { MapPin, Search, ZoomIn, ZoomOut, RotateCw, Hand, Sparkles, Navigation } from 'lucide-react';
 import { cultureCapsules } from '../data/cultureCapsules';
@@ -33,6 +33,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
   const [isGlowMode, setIsGlowMode] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [altitude, setAltitude] = useState(2.5);
+  const zoomTimeout = useRef<any>(null);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -192,6 +193,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           lng: userLocation.lng,
           timelinePeriod: "Present Day",
           capsuleColor: "#3B82F6", // Blue marker
+          isUserLocation: true,
           perspectives: [
             {
               role: "Local Explorer",
@@ -260,6 +262,10 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
     setIsRotating(!isRotating);
   };
 
+  const userLocationData = useMemo(() => {
+    return userLocation ? [{ ...userLocation, isUserLocation: true }] : [];
+  }, [userLocation]);
+
   return (
     <div className="w-full h-full relative">
       <div 
@@ -271,7 +277,12 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           width={dimensions.width}
           height={dimensions.height}
           onGlobeReady={() => setGlobeReady(true)}
-          onZoom={(pov: any) => setAltitude(pov.altitude)}
+          onZoom={(pov: any) => {
+            if (zoomTimeout.current) clearTimeout(zoomTimeout.current);
+            zoomTimeout.current = setTimeout(() => {
+              setAltitude(pov.altitude);
+            }, 80); // Debounce free's up to browser from 60fps React re-renders while allowing it to scale fluidly
+          }}
           
           // Realistic textures with explicit performance bounds
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -324,7 +335,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
             }
             setSearchQuery('');
           }}
-          htmlElementsData={userLocation ? [{ ...userLocation, isUserLocation: true }] : []}
+          htmlElementsData={userLocationData}
           htmlElement={(d: any) => {
             const el = document.createElement('div');
             el.innerHTML = `

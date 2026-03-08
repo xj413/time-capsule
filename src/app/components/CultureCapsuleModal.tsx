@@ -271,10 +271,10 @@ export function CultureCapsuleModal({
         </div>
 
         {/* Tab Bar */}
-        <div className="flex border-b border-slate-700 bg-slate-900 overflow-x-auto scrollbar-hide">
+        <div className="flex border-b border-slate-700 bg-slate-900">
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'history' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'history' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <BookOpen className="w-4 h-4" />
             History
@@ -282,7 +282,7 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('life')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'life' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'life' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Sun className="w-4 h-4" />
             Life Today
@@ -290,7 +290,7 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('food')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'food' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'food' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Utensils className="w-4 h-4" />
             Food
@@ -298,7 +298,7 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('clothing')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'clothing' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'clothing' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Shirt className="w-4 h-4" />
             Clothing
@@ -306,7 +306,7 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('traditions')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'traditions' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'traditions' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Flame className="w-4 h-4" />
             Traditions
@@ -314,7 +314,7 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('community')}
-            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'community' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'community' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Users className="w-4 h-4" />
             Community Voices

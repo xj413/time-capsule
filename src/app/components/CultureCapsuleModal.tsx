@@ -83,15 +83,18 @@ export function CultureCapsuleModal({
   const [isRecording, setIsRecording] = useState(false);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [transcriptionText, setTranscriptionText] = useState("");
-  const [isPlayingId, setIsPlayingId] = useState<string | null>(null); // Replaces playingId
+  const [isPlayingId, setIsPlayingId] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ttsAudioRef = useRef<HTMLAudioElement>(null);
 
   // Stop speech on unmount
   useEffect(() => {
     return () => {
-      window.speechSynthesis.cancel();
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.pause();
+      }
     };
   }, []);
 
@@ -103,8 +106,10 @@ export function CultureCapsuleModal({
       recognitionRef.current.stop();
       setIsRecording(false);
     }
-    window.speechSynthesis.cancel();
-    setIsPlayingId(null); // Updated from setPlayingId
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.pause();
+    }
+    setIsPlayingId(null);
     setSelectedImage(null);
   }, [capsule.id, activeTab]);
 
@@ -116,24 +121,29 @@ export function CultureCapsuleModal({
   };
 
   const handlePlayVoiceNote = (id: string, text: string) => {
-    if (isPlayingId === id) { // Updated from playingId
-      window.speechSynthesis.cancel();
-      setIsPlayingId(null); // Updated from setPlayingId
+    if (isPlayingId === id) {
+      if (ttsAudioRef.current) {
+        ttsAudioRef.current.pause();
+      }
+      setIsPlayingId(null);
       return;
     }
 
-    window.speechSynthesis.cancel();
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.pause();
+    }
 
     if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.95; // slightly slower for better immersion
 
-    utterance.onend = () => setIsPlayingId(null); // Updated from setPlayingId
-    utterance.onerror = () => setIsPlayingId(null); // Updated from setPlayingId
+    if (ttsAudioRef.current) {
+      ttsAudioRef.current.src = `http://127.0.0.1:8000/api/capsules/tts?text=${encodeURIComponent(text)}`;
+      ttsAudioRef.current.play().catch(e => console.error("Audio playback failed:", e));
 
-    setIsPlayingId(id); // Updated from setPlayingId
-    window.speechSynthesis.speak(utterance);
+      ttsAudioRef.current.onended = () => setIsPlayingId(null);
+      ttsAudioRef.current.onerror = () => setIsPlayingId(null);
+    }
+
+    setIsPlayingId(id);
   };
 
   const toggleRecording = () => {
@@ -208,6 +218,9 @@ export function CultureCapsuleModal({
         className="absolute inset-0 bg-black/60 backdrop-blur-md"
         onClick={onClose}
       />
+
+      {/* Hidden container for ElevenLabs TTS Stream */}
+      <audio ref={ttsAudioRef} className="hidden" />
 
       {/* Modal Content */}
       <div
@@ -329,8 +342,8 @@ export function CultureCapsuleModal({
                         key={p.role}
                         onClick={() => setActivePerspectiveIndex(idx)}
                         className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${idx === activePerspectiveIndex
-                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                            : 'text-slate-400 hover:text-white'
+                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                          : 'text-slate-400 hover:text-white'
                           }`}
                       >
                         {p.role}
@@ -356,8 +369,8 @@ export function CultureCapsuleModal({
                         handlePlayVoiceNote(`history-tts-${activePerspectiveIndex}`, capsule.perspectives[activePerspectiveIndex].summary);
                       }}
                       className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isPlayingId === `history-tts-${activePerspectiveIndex}`
-                          ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.5)]'
-                          : 'bg-slate-700/50 hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-400 opacity-50 group-hover:opacity-100'
+                        ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.5)]'
+                        : 'bg-slate-700/50 hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-400 opacity-50 group-hover:opacity-100'
                         }`}
                       title={isPlayingId === `history-tts-${activePerspectiveIndex}` ? "Stop playback" : "Read aloud"}
                     >
@@ -500,8 +513,8 @@ export function CultureCapsuleModal({
                           <button
                             onClick={() => handlePlayVoiceNote(vn.id, vn.transcription)}
                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isPlayingId === vn.id
-                                ? 'bg-amber-600 text-slate-900 shadow-[0_0_15px_rgba(217,119,6,0.4)]'
-                                : 'bg-slate-700 hover:bg-amber-500/20 text-white hover:text-amber-400'
+                              ? 'bg-amber-600 text-slate-900 shadow-[0_0_15px_rgba(217,119,6,0.4)]'
+                              : 'bg-slate-700 hover:bg-amber-500/20 text-white hover:text-amber-400'
                               }`}
                           >
                             {isPlayingId === vn.id ? (
@@ -568,8 +581,8 @@ export function CultureCapsuleModal({
                     onTouchStart={handleVideoRecordStart}
                     onTouchEnd={handleVideoRecordStop}
                     className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${isVideoRecording
-                        ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50'
-                        : 'bg-amber-500 text-slate-900 hover:bg-amber-400 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                      ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50'
+                      : 'bg-amber-500 text-slate-900 hover:bg-amber-400 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]'
                       }`}
                   >
                     <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />
@@ -644,8 +657,8 @@ export function CultureCapsuleModal({
                   <button
                     onClick={toggleRecording}
                     className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border font-medium transition-colors ${isRecording
-                        ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20'
-                        : 'bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800'
+                      ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20'
+                      : 'bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800'
                       }`}
                   >
                     <Mic className={`w-5 h-5 ${isRecording ? 'animate-bounce' : ''}`} />

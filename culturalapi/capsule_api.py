@@ -53,6 +53,8 @@ class MusicResponse(BaseModel):
     track: dict | None
 
 
+from fastapi.responses import Response
+
 class CapsuleResponse(BaseModel):
     context: ContextResponse
     image: ImageResponse
@@ -68,9 +70,49 @@ async def root():
             "GET /api/capsules/context?place=Tokyo",
             "GET /api/capsules/image?place=Tokyo",
             "GET /api/capsules/music?place=Tokyo",
-            "GET /api/capsules/full?place=Tokyo"
+            "GET /api/capsules/full?place=Tokyo",
+            "GET /api/capsules/tts?text=Hello"
         ]
     }
+
+@app.get("/api/capsules/tts")
+async def get_tts(text: str):
+    if not text or not text.strip():
+        raise HTTPException(400, "Text is required")
+
+    elevenlabs_key = os.environ.get("ELEVENLABS_API_KEY")
+    if not elevenlabs_key:
+        raise HTTPException(500, "ElevenLabs API Key not configured")
+
+    voice_id = "21m00Tcm4TlvDq8ikWAM" # Rachel Voice Model
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+
+    headers = {
+        "xi-api-key": elevenlabs_key,
+        "Content-Type": "application/json",
+        "Accept": "audio/mpeg"
+    }
+
+    data = {
+        "text": text,
+        "model_id": "eleven_monolingual_v1",
+        "voice_settings": {
+            "stability": 0.5,
+            "similarity_boost": 0.5
+        }
+    }
+
+    try:
+        r = requests.post(url, json=data, headers=headers, timeout=15)
+        if not r.ok:
+            print(f"ElevenLabs error: {r.text}")
+            raise HTTPException(r.status_code, "Failed to generate text-to-speech")
+            
+        return Response(content=r.content, media_type="audio/mpeg")
+    except Exception as e:
+        print(f"TTS Error: {e}")
+        raise HTTPException(500, "Internal Server Error during TTS")
+
 
 
 @app.get("/api/capsules/context", response_model=ContextResponse)

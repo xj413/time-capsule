@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import Globe from 'react-globe.gl';
-import { MapPin, Search, ZoomIn, ZoomOut, RotateCw, Hand, Sparkles } from 'lucide-react';
+import { MapPin, Search, ZoomIn, ZoomOut, RotateCw, Hand, Sparkles, Navigation } from 'lucide-react';
 import { cultureCapsules } from '../data/cultureCapsules';
 import { countryLabels } from '../data/countries';
 import { CultureCapsule } from '../models/cultureCapsule';
@@ -82,6 +82,48 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
       globeRef.current.controls().enableDamping = true;
     }
   }, [isRotating, globeReady]);
+
+  const handleMyLocationClick = () => {
+    if (userLocation) {
+      // Smoothly fly to the location
+      if (globeRef.current) {
+        globeRef.current.pointOfView({ lat: userLocation.lat, lng: userLocation.lng, altitude: 0.6 }, 1000);
+      }
+      
+      // Delay opening the modal slightly so the user sees the globe spinning to their location
+      setTimeout(() => {
+        const userCapsule: CultureCapsule = {
+          id: "user-location",
+          name: "Your Location",
+          country: "Current Area",
+          lat: userLocation.lat,
+          lng: userLocation.lng,
+          timelinePeriod: "Present Day",
+          capsuleColor: "#3B82F6", // Blue marker
+          perspectives: [
+            {
+              role: "Local Explorer",
+              summary: "This is your current location! You serve as the historian here. By adding your unique experiences, photos, and voice notes into this capsule, you help document the lived reality of this spot for the future."
+            }
+          ],
+          lifeTodayCards: [
+            {
+              category: "Community Capture",
+              title: "Be the First to Share",
+              content: "There are no local insights recorded here yet. Head over to the Community Voices tab to capture the moment, tell a story, or snap a photo of what life looks like around you."
+            }
+          ],
+          images: [],
+          stories: [],
+          voiceNotes: [],
+          questions: []
+        };
+        setSelectedCapsule(userCapsule);
+      }, 600);
+    } else {
+      alert("Unable to find your location. Please ensure location services are enabled and you have granted permission.");
+    }
+  };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -253,6 +295,16 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           >
             {isGlowMode && <div className="absolute inset-0 bg-amber-400/10 animate-pulse rounded-xl" />}
             <Sparkles className={`w-5 h-5 relative z-10 ${isGlowMode ? 'animate-[spin_4s_linear_infinite]' : ''}`} />
+          </button>
+          
+          {/* My Location Toggle */}
+          <button
+            onClick={handleMyLocationClick}
+            className="p-3 rounded-xl border backdrop-blur-md shadow-xl transition-all group flex items-center justify-center relative bg-slate-900/60 border-slate-700 text-slate-400 hover:text-blue-400 hover:border-blue-500/50 w-12 h-12"
+            title="Go to My Location"
+          >
+            {userLocation && <div className="absolute inset-0 bg-blue-500/5 animate-pulse rounded-xl pointer-events-none" />}
+            <Navigation className="w-5 h-5 relative z-10" />
           </button>
         </div>
 

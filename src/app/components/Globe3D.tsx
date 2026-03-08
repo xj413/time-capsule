@@ -28,6 +28,23 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
   const [globeReady, setGlobeReady] = useState(false);
   const [selectedCapsule, setSelectedCapsule] = useState<CultureCapsule | null>(null);
   const [isGlowMode, setIsGlowMode] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+
+  useEffect(() => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn("Geolocation permission denied or error:", error);
+        }
+      );
+    }
+  }, []);
 
   // Calculate interaction volume for a capsule
   const getInteractionVolume = (capsule: CultureCapsule) => {
@@ -151,8 +168,12 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
             </div>
           `}
           onPointClick={(d: any) => {
+            if (d.isUserLocation) return;
             setSelectedCapsule(d);
             setSearchQuery('');
+            if (globeRef.current) {
+              globeRef.current.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.6 }, 1000);
+            }
           }}
           onGlobeClick={(coords) => {
             if (onLocationSelect) {
@@ -163,6 +184,20 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
               });
             }
             setSearchQuery('');
+          }}
+          htmlElementsData={userLocation ? [{ ...userLocation, isUserLocation: true }] : []}
+          htmlElement={(d: any) => {
+            const el = document.createElement('div');
+            el.innerHTML = `
+              <div class="flex flex-col items-center pointer-events-none -mt-8">
+                <div class="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 shadow-lg border border-blue-400 whitespace-nowrap">You are here</div>
+                <div class="relative w-4 h-4">
+                  <div class="absolute inset-0 bg-blue-500 rounded-full animate-ping opacity-75"></div>
+                  <div class="relative w-4 h-4 bg-blue-500 border-2 border-white rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                </div>
+              </div>
+            `;
+            return el;
           }}
           ringsData={isGlowMode ? cultureCapsules : []}
           ringLat="lat"
@@ -186,8 +221,12 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
             </div>
           `}
           onRingClick={(d: any) => {
+            if (d.isUserLocation) return;
             setSelectedCapsule(d);
             setSearchQuery('');
+            if (globeRef.current) {
+              globeRef.current.pointOfView({ lat: d.lat, lng: d.lng, altitude: 0.6 }, 1000);
+            }
           }}
 
         />

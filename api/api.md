@@ -14,6 +14,8 @@ http://localhost:5000/api
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | `/users` | Retrieve all users |
+| GET | `/users/<user_id>` | Retrieve a specific user by ID |
 | GET | `/cities` | Retrieve all cities |
 | GET | `/cultures` | Retrieve all cultural categories |
 | GET | `/sites/city/<city_name>` | Retrieve all sites in a specific city |
@@ -25,7 +27,56 @@ http://localhost:5000/api
 
 ## Endpoints
 
-### 1. Fetch All Cities
+### 1. Fetch All Users
+**GET** `/users`
+
+Retrieve all users in the database.
+
+**Request:**
+```
+GET http://localhost:5000/api/users
+```
+
+**Response (200):**
+```json
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "first_name": "Alice",
+    "last_name": "Johnson"
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "first_name": "Bob",
+    "last_name": "Smith"
+  }
+]
+```
+
+---
+
+### 2. Fetch User by ID
+**GET** `/users/<user_id>`
+
+Retrieve a specific user by their ID.
+
+**Request:**
+```
+GET http://localhost:5000/api/users/550e8400-e29b-41d4-a716-446655440001
+```
+
+**Response (200):**
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440001",
+  "first_name": "Alice",
+  "last_name": "Johnson"
+}
+```
+
+---
+
+### 3. Fetch All Cities
 **GET** `/cities`
 
 Retrieve all cities in the database.
@@ -55,7 +106,7 @@ GET http://localhost:5000/api/cities
 
 ---
 
-### 2. Fetch All Cultures
+### 4. Fetch All Cultures
 **GET** `/cultures`
 
 Retrieve all cultural categories in the database.
@@ -83,7 +134,7 @@ GET http://localhost:5000/api/cultures
 
 ---
 
-### 3. Fetch All Sites Within a City
+### 5. Fetch All Sites Within a City
 **GET** `/sites/city/<city_name>`
 
 Retrieve all cultural sites in a specific city by name.
@@ -119,7 +170,7 @@ GET http://localhost:5000/api/sites/city/Durham
 
 ---
 
-### 4. Fetch All Contributions for a Site
+### 6. Fetch All Contributions for a Site
 **GET** `/contributions/<site_id>`
 
 Retrieve the 5 most recent user contributions for a specific site.
@@ -151,7 +202,7 @@ GET http://localhost:5000/api/contributions/523e4567-e89b-12d3-a456-426614174000
 
 ---
 
-### 5. Post a User Contribution to a Site
+### 7. Post a User Contribution to a Site
 **POST** `/contributions`
 
 Create a new contribution for a site.
@@ -183,7 +234,7 @@ Content-Type: application/json
 
 ---
 
-### 6. Add a New Site
+### 8. Add a New Site
 **POST** `/sites`
 
 Create a new cultural site in the database.

@@ -17,7 +17,60 @@ def row_to_dict(cursor, row):
     return dict(zip(columns, row))
 
 
-@app.route("/api/cities", methods=["GET"])
+@app.route("/api/users", methods=["GET"])
+def get_users():
+    conn = get_db()
+    if not conn:
+        raise DatabaseError("Failed to connect to database")
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, first_name, last_name FROM users")
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        users = []
+        for r in rows:
+            users.append({
+                "id": str(r[0]),
+                "first_name": r[1],
+                "last_name": r[2]
+            })
+        return jsonify(users)
+    except Exception as e:
+        conn.close()
+        raise DatabaseError(str(e))
+
+
+@app.route("/api/users/<user_id>", methods=["GET"])
+def get_user_by_id(user_id):
+    conn = get_db()
+    if not conn:
+        raise DatabaseError("Failed to connect to database")
+    
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT id, first_name, last_name FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not row:
+            raise NotFoundError(f"User with ID '{user_id}' not found")
+        
+        user = {
+            "id": str(row[0]),
+            "first_name": row[1],
+            "last_name": row[2]
+        }
+        return jsonify(user)
+    except NotFoundError:
+        conn.close()
+        raise
+    except Exception as e:
+        conn.close()
+        raise DatabaseError(str(e))
 def get_cities():
     conn = get_db()
     if not conn:

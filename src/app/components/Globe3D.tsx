@@ -32,6 +32,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
   const [selectedCapsule, setSelectedCapsule] = useState<CultureCapsule | null>(null);
   const [isGlowMode, setIsGlowMode] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [altitude, setAltitude] = useState(2.5);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -270,6 +271,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           width={dimensions.width}
           height={dimensions.height}
           onGlobeReady={() => setGlobeReady(true)}
+          onZoom={(pov: any) => setAltitude(pov.altitude)}
           
           // Realistic textures
           globeImageUrl="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -346,9 +348,14 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           labelLat={(d: any) => d.lat}
           labelLng={(d: any) => d.lng}
           labelText={(d: any) => d.name}
-          labelSize={(d: any) => d.isOcean ? 2.5 : Math.max(0.3, Math.min(1.5, (d.area || 100000) / 1000000))}
+          labelSize={(d: any) => {
+            const baseSize = d.isOcean ? 3.0 : Math.max(0.5, Math.min(2.0, (d.area || 100000) / 800000));
+            // Keep text relatively uniform on screen regardless of zoom altitude
+            const zoomMultiplier = Math.max(0.3, altitude / 2.0); 
+            return baseSize * zoomMultiplier;
+          }}
           labelDotRadius={(d: any) => d.isOcean ? 0 : 0.2}
-          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.65)'}
+          labelColor={(d: any) => d.isOcean ? 'rgba(59, 130, 246, 0.4)' : 'rgba(255, 255, 255, 0.75)'}
           labelResolution={3}
         />
 

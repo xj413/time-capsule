@@ -916,5 +916,70 @@ export const cultureCapsules: CultureCapsule[] = [
         answeredBy: "Hamish",
       },
     ],
+  },
+  {
+    id: "cape-coast-ghana",
+    name: "Cape Coast",
+    country: "Ghana",
+    lat: 5.1053,
+    lng: -1.2466,
+    timelinePeriod: "Pre-Colonial to Modern (15th Century - Present)",
+    capsuleColor: "#2A9D8F",
+    perspectives: [
+      {
+        role: "General History",
+        summary: "Cape Coast, formerly the seat of the British colonial administration until 1877, holds immense historical weight. It is known for Cape Coast Castle, a striking and somber monument to the transatlantic slave trade, and its proximity to the Kakum National Park rainforest.",
+      },
+      {
+        role: "Local Historian",
+        summary: "Our city stands at the crossroads of immense tragedy and breathtaking natural beauty. The castles force the world to remember the past, while our vibrant fishing communities look towards the future.",
+      }
+    ],
+    lifeTodayCards: [
+      {
+        category: "History",
+        title: "The Castles",
+        content: "Cape Coast Castle and Elmina Castle are harrowing, essential visits. Passing through the 'Door of No Return' is a deeply moving experience that connects the diaspora to their ancestry.",
+      },
+      {
+        category: "Nature",
+        title: "Kakum Canopy Walkway",
+        content: "Just north of the city lies Kakum National Park. The suspended canopy walk, hanging 30 meters above the rainforest floor, offers incredible views of the lush ecosystem and its wildlife.",
+      }
+    ],
+    images: ["/cape-coast.png"],
+    stories: [
+      {
+        id: "cc-1",
+        author: "Marcus Johnson",
+        date: "May 12, 2026",
+        text: "Walking through the dungeons of Cape Coast Castle was the heaviest experience of my life. You can feel the echoes of the ancestors in the stone. A necessary pilgrimage.",
+      },
+      {
+        id: "cc-2",
+        author: "Abena",
+        date: "June 4, 2026",
+        text: "The Kakum canopy walk is terrifying but exhilarating! You're suspended right in the middle of the jungle canopy. We saw mona monkeys swinging in the distance.",
+      }
+    ],
+    voiceNotes: [
+      {
+        id: "vn-cc-1",
+        author: "Kwesi",
+        date: "March 8, 2026",
+        transcription: "When you visit the castles, take a moment to look out at the ocean from the cannons. It's beautiful, but knowing the history makes the contrast sharp and unforgettable.",
+        duration: "0:18",
+        audioUrl: "",
+      },
+    ],
+    questions: [
+      {
+        id: "q-cc-1",
+        author: "David",
+        question: "How long is the drive from Accra to Cape Coast?",
+        answer: "It usually takes about 3 to 4 hours depending on traffic. It's a very scenic drive along the coast, especially once you pass through Winneba.",
+        answeredBy: "Nana",
+      },
+    ],
   }
 ];

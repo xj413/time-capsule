@@ -31,13 +31,11 @@ import {
 interface CultureCapsuleModalProps {
   capsule: CultureCapsule;
   onClose: () => void;
-  userLocation: {lat: number, lng: number} | null;
 }
 
 export function CultureCapsuleModal({ 
   capsule, 
-  onClose,
-  userLocation 
+  onClose
 }: CultureCapsuleModalProps) {
   const [activeTab, setActiveTab] = useState<'history' | 'life' | 'community'>('history');
   const [activePerspectiveIndex, setActivePerspectiveIndex] = useState(0);

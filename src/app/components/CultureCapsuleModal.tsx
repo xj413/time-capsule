@@ -10,34 +10,28 @@ import {
   Users, 
   Sparkles, 
   Image as ImageIcon, 
-  ImagePlus,
-  Coffee, 
-  Mic, 
-  Play, 
-  Square,
-  UploadCloud, 
-  PenTool, 
-  User, 
-  MessageSquare, 
-  HelpCircle, 
-  CheckCircle2, 
-  Send
-} from 'lucide-react';
+import { MapPin, ArrowRight, X, Play, Square, Mic, Globe, Clock, Users, Sun, PenTool, Sparkles, Navigation, ImagePlus, UploadCloud, Video } from 'lucide-react';
 
 interface CultureCapsuleModalProps {
   capsule: CultureCapsule;
   onClose: () => void;
+  userLocation: {lat: number, lng: number} | null;
 }
 
-export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalProps) {
+export function CultureCapsuleModal({ 
+  capsule, 
+  onClose,
+  userLocation 
+}: CultureCapsuleModalProps) {
   const [activeTab, setActiveTab] = useState<'history' | 'life' | 'community'>('history');
   const [activePerspectiveIndex, setActivePerspectiveIndex] = useState(0);
 
   // Speech to Text state
   const [localVoiceNotes, setLocalVoiceNotes] = useState(capsule.voiceNotes);
   const [isRecording, setIsRecording] = useState(false);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [transcriptionText, setTranscriptionText] = useState("");
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [isPlayingId, setIsPlayingId] = useState<string | null>(null); // Replaces playingId
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -58,7 +52,7 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
       setIsRecording(false);
     }
     window.speechSynthesis.cancel();
-    setPlayingId(null);
+    setIsPlayingId(null); // Updated from setPlayingId
     setSelectedImage(null);
   }, [capsule.id, activeTab]);
 
@@ -70,9 +64,9 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
   };
 
   const handlePlayVoiceNote = (id: string, text: string) => {
-    if (playingId === id) {
+    if (isPlayingId === id) { // Updated from playingId
       window.speechSynthesis.cancel();
-      setPlayingId(null);
+      setIsPlayingId(null); // Updated from setPlayingId
       return;
     }
     
@@ -83,10 +77,10 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
     utterance.lang = 'en-US';
     utterance.rate = 0.95; // slightly slower for better immersion
     
-    utterance.onend = () => setPlayingId(null);
-    utterance.onerror = () => setPlayingId(null);
+    utterance.onend = () => setIsPlayingId(null); // Updated from setPlayingId
+    utterance.onerror = () => setIsPlayingId(null); // Updated from setPlayingId
 
-    setPlayingId(id);
+    setIsPlayingId(id); // Updated from setPlayingId
     window.speechSynthesis.speak(utterance);
   };
 
@@ -140,6 +134,20 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
+
+  const handleVideoRecordStart = () => {
+    setIsVideoRecording(true);
+    console.log("BACKEND API EVENT: Video recording Started for location", capsule.id);
+    // In a real app, this would hit fetch('/api/recording/start', { method: 'POST' })
+  };
+
+  const handleVideoRecordStop = () => {
+    setIsVideoRecording(false);
+    console.log("BACKEND API EVENT: Video recording Stopped and saved for location", capsule.id);
+    // In a real app, this would hit fetch('/api/recording/stop', { method: 'POST' })
+  };
+
+  const activePerspective = capsule.perspectives[activePerspectiveIndex] || capsule.perspectives[0];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -396,6 +404,42 @@ export function CultureCapsuleModal({ capsule, onClose }: CultureCapsuleModalPro
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* My Location: API Video Recorder */}
+              {capsule.isUserLocation && (
+                <div className="bg-gradient-to-br from-indigo-900/40 to-slate-800 p-5 rounded-2xl border border-indigo-500/30 mb-8">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-white font-bold flex items-center gap-2">
+                      <Video className="w-5 h-5 text-indigo-400" /> Live Location Feed
+                    </h4>
+                    {isVideoRecording && (
+                      <span className="flex items-center gap-2 text-red-400 text-xs font-bold animate-pulse">
+                        <div className="w-2 h-2 rounded-full bg-red-500" /> LIVE TRANSMITTING
+                      </span>
+                    )}
+                  </div>
+                  
+                  <p className="text-indigo-200/70 text-sm mb-4">
+                    Press and hold the button below to stream a live video feed from your current location directly to the globe backend.
+                  </p>
+                  
+                  <button 
+                    onMouseDown={handleVideoRecordStart}
+                    onMouseUp={handleVideoRecordStop}
+                    onMouseLeave={() => isVideoRecording && handleVideoRecordStop()}
+                    onTouchStart={handleVideoRecordStart}
+                    onTouchEnd={handleVideoRecordStop}
+                    className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${
+                      isVideoRecording 
+                      ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50' 
+                      : 'bg-indigo-600 text-white hover:bg-indigo-500 hover:scale-[1.02] hover:shadow-indigo-500/50'
+                    }`}
+                  >
+                    <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />
+                    {isVideoRecording ? 'Release to Stop & Send' : 'Hold to Record & Broadcast'}
+                  </button>
                 </div>
               )}
 

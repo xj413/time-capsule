@@ -1,31 +1,36 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CultureCapsule } from '../models/cultureCapsule';
-import { 
-  X, 
-  MapPin, 
-  Clock, 
-  Compass, 
-  BookOpen, 
-  Sun, 
-  Users, 
-  Sparkles, 
-  Image as ImageIcon, 
+import {
+  X,
+  MapPin,
+  Clock,
+  Compass,
+  BookOpen,
+  Sun,
+  Users,
+  Sparkles,
+  Image as ImageIcon,
   ImagePlus,
-  Coffee, 
-  Mic, 
-  Play, 
+  Coffee,
+  Mic,
+  Play,
   Square,
-  UploadCloud, 
-  PenTool, 
-  User, 
-  MessageSquare, 
-  HelpCircle, 
-  CheckCircle2, 
+  UploadCloud,
+  PenTool,
+  User,
+  MessageSquare,
+  HelpCircle,
+  CheckCircle2,
   Send,
   Video,
   ArrowRight,
   Navigation,
-  Globe
+  Globe,
+  Utensils,
+  Shirt,
+  Flame,
+  Music,
+  Pause
 } from 'lucide-react';
 
 interface CultureCapsuleModalProps {
@@ -33,12 +38,45 @@ interface CultureCapsuleModalProps {
   onClose: () => void;
 }
 
-export function CultureCapsuleModal({ 
-  capsule, 
+export function CultureCapsuleModal({
+  capsule,
   onClose
 }: CultureCapsuleModalProps) {
-  const [activeTab, setActiveTab] = useState<'history' | 'life' | 'community'>('history');
+  const [activeTab, setActiveTab] = useState<'history' | 'life' | 'community' | 'food' | 'clothing' | 'traditions'>('history');
   const [activePerspectiveIndex, setActivePerspectiveIndex] = useState(0);
+
+  // Music API State
+  const [musicTrack, setMusicTrack] = useState<any>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const backgroundAudioRef = useRef<HTMLAudioElement>(null);
+
+  useEffect(() => {
+    async function fetchMusic() {
+      try {
+        const res = await fetch(`http://127.0.0.1:8000/api/capsules/music?place=${encodeURIComponent(capsule.name)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.track) {
+            setMusicTrack(data.track);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch music", e);
+      }
+    }
+    fetchMusic();
+  }, [capsule.name]);
+
+  const toggleBackgroundMusic = () => {
+    if (backgroundAudioRef.current) {
+      if (isMusicPlaying) {
+        backgroundAudioRef.current.pause();
+      } else {
+        backgroundAudioRef.current.play();
+      }
+      setIsMusicPlaying(!isMusicPlaying);
+    }
+  };
 
   // Speech to Text state
   const [localVoiceNotes, setLocalVoiceNotes] = useState(capsule.voiceNotes);
@@ -83,14 +121,14 @@ export function CultureCapsuleModal({
       setIsPlayingId(null); // Updated from setPlayingId
       return;
     }
-    
+
     window.speechSynthesis.cancel();
-    
+
     if (!text) return;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     utterance.rate = 0.95; // slightly slower for better immersion
-    
+
     utterance.onend = () => setIsPlayingId(null); // Updated from setPlayingId
     utterance.onerror = () => setIsPlayingId(null); // Updated from setPlayingId
 
@@ -112,7 +150,7 @@ export function CultureCapsuleModal({
       recognition.continuous = true;
       recognition.interimResults = true;
       recognition.lang = 'en-US';
-      
+
       recognition.onresult = (event: any) => {
         let currentTranscript = "";
         for (let i = 0; i < event.results.length; i++) {
@@ -120,10 +158,10 @@ export function CultureCapsuleModal({
         }
         setTranscriptionText(currentTranscript);
       };
-      
+
       recognition.onerror = () => setIsRecording(false);
       recognition.onend = () => setIsRecording(false);
-      
+
       setTranscriptionText("");
       recognition.start();
       recognitionRef.current = recognition;
@@ -166,13 +204,13 @@ export function CultureCapsuleModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Blurred dark overlay */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/60 backdrop-blur-md"
         onClick={onClose}
       />
-      
+
       {/* Modal Content */}
-      <div 
+      <div
         className="relative w-full max-w-4xl max-h-[90vh] bg-slate-900 rounded-3xl border border-amber-600/30 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col transform transition-all animate-in slide-in-from-bottom-8 fade-in duration-300"
       >
         {/* Header */}
@@ -181,7 +219,7 @@ export function CultureCapsuleModal({
             <div className="w-16 h-16 bg-amber-500/20 rounded-2xl border border-amber-500/40 flex items-center justify-center shrink-0">
               <Compass className="w-8 h-8 text-amber-400" />
             </div>
-            
+
             <div className="flex-1 pr-8">
               <h2 className="text-3xl font-bold text-amber-100 mb-2 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
                 {capsule.name}
@@ -195,11 +233,23 @@ export function CultureCapsuleModal({
                   <Clock className="w-4 h-4" />
                   <span>{capsule.timelinePeriod}</span>
                 </div>
+                {musicTrack && (
+                  <div className="flex items-center gap-2 ml-4 bg-amber-500/20 px-3 py-1.5 rounded-full border border-amber-500/30">
+                    <button
+                      onClick={toggleBackgroundMusic}
+                      className="text-amber-300 hover:text-amber-100 flex items-center gap-2 transition-colors"
+                    >
+                      {isMusicPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      <span className="text-xs font-bold leading-none translate-y-[1px]">Traditional Music: {musicTrack.title}</span>
+                    </button>
+                    <audio ref={backgroundAudioRef} src={musicTrack.url} loop />
+                  </div>
+                )}
               </div>
             </div>
           </div>
-          
-          <button 
+
+          <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-amber-100/70 hover:text-amber-100 hover:bg-white/10 rounded-full transition-colors"
           >
@@ -208,10 +258,10 @@ export function CultureCapsuleModal({
         </div>
 
         {/* Tab Bar */}
-        <div className="flex border-b border-slate-700 bg-slate-900">
+        <div className="flex border-b border-slate-700 bg-slate-900 overflow-x-auto scrollbar-hide">
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'history' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'history' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <BookOpen className="w-4 h-4" />
             History
@@ -219,15 +269,39 @@ export function CultureCapsuleModal({
           </button>
           <button
             onClick={() => setActiveTab('life')}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'life' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'life' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Sun className="w-4 h-4" />
             Life Today
             {activeTab === 'life' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />}
           </button>
           <button
+            onClick={() => setActiveTab('food')}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'food' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+          >
+            <Utensils className="w-4 h-4" />
+            Food
+            {activeTab === 'food' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('clothing')}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'clothing' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+          >
+            <Shirt className="w-4 h-4" />
+            Clothing
+            {activeTab === 'clothing' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />}
+          </button>
+          <button
+            onClick={() => setActiveTab('traditions')}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'traditions' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+          >
+            <Flame className="w-4 h-4" />
+            Traditions
+            {activeTab === 'traditions' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-amber-400" />}
+          </button>
+          <button
             onClick={() => setActiveTab('community')}
-            className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'community' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
+            className={`flex-none px-6 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors relative ${activeTab === 'community' ? 'text-amber-400' : 'text-amber-100/50 hover:text-amber-100/80'}`}
           >
             <Users className="w-4 h-4" />
             Community Voices
@@ -237,7 +311,7 @@ export function CultureCapsuleModal({
 
         {/* Tab Content Area */}
         <div className="flex-1 overflow-y-auto p-6 bg-slate-900 scrollbar-thin scrollbar-thumb-amber-600/30 scrollbar-track-transparent">
-          
+
           {/* HISTORY TAB */}
           {activeTab === 'history' && (
             <div className="space-y-8 animate-in fade-in duration-300">
@@ -247,25 +321,24 @@ export function CultureCapsuleModal({
                     <Sparkles className="w-5 h-5 text-amber-400" />
                     <h3 className="text-xl font-bold text-white">Historical Context</h3>
                   </div>
-                  
+
                   {/* Perspective Selector */}
                   <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
                     {capsule.perspectives.map((p, idx) => (
                       <button
                         key={p.role}
                         onClick={() => setActivePerspectiveIndex(idx)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
-                          idx === activePerspectiveIndex 
-                          ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' 
-                          : 'text-slate-400 hover:text-white'
-                        }`}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${idx === activePerspectiveIndex
+                            ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                            : 'text-slate-400 hover:text-white'
+                          }`}
                       >
                         {p.role}
                       </button>
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="bg-slate-800/50 p-6 rounded-2xl border border-amber-600/20 relative group">
                   {/* Badge for AI Synthesis if it's the general history */}
                   {activePerspectiveIndex === 0 && (
@@ -273,20 +346,19 @@ export function CultureCapsuleModal({
                       <Sparkles className="w-3 h-3" /> AI Synthesized
                     </div>
                   )}
-                  
+
                   {/* TTS Audio Controls */}
                   <div className="absolute top-4 right-4 flex items-center">
-                    <button 
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         // use a deterministic id for this TTS source
                         handlePlayVoiceNote(`history-tts-${activePerspectiveIndex}`, capsule.perspectives[activePerspectiveIndex].summary);
                       }}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                        isPlayingId === `history-tts-${activePerspectiveIndex}`
-                        ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.5)]' 
-                        : 'bg-slate-700/50 hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-400 opacity-50 group-hover:opacity-100'
-                      }`}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isPlayingId === `history-tts-${activePerspectiveIndex}`
+                          ? 'bg-amber-600 text-white shadow-[0_0_10px_rgba(217,119,6,0.5)]'
+                          : 'bg-slate-700/50 hover:bg-amber-500/20 text-amber-500/70 hover:text-amber-400 opacity-50 group-hover:opacity-100'
+                        }`}
                       title={isPlayingId === `history-tts-${activePerspectiveIndex}` ? "Stop playback" : "Read aloud"}
                     >
                       {isPlayingId === `history-tts-${activePerspectiveIndex}` ? (
@@ -310,9 +382,9 @@ export function CultureCapsuleModal({
                     <h3 className="text-xl font-bold text-white">Gallery</h3>
                   </div>
                   <div className="rounded-2xl overflow-hidden border border-slate-700">
-                    <img 
-                      src={capsule.images[0]} 
-                      alt={capsule.name} 
+                    <img
+                      src={capsule.images[0]}
+                      alt={capsule.name}
                       className="w-full h-[300px] object-cover"
                     />
                   </div>
@@ -330,7 +402,7 @@ export function CultureCapsuleModal({
                   <h3 className="text-xl font-bold text-white">Life Today</h3>
                   <span className="text-xs text-slate-400 ml-auto bg-slate-800 px-2 py-1 rounded">Community Contributions</span>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {capsule.lifeTodayCards.map((card, idx) => (
                     <div key={idx} className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-amber-600/20 hover:border-amber-500/40 transition-colors flex flex-col h-full">
@@ -352,10 +424,61 @@ export function CultureCapsuleModal({
             </div>
           )}
 
+          {/* FOOD TAB */}
+          {activeTab === 'food' && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <Utensils className="w-5 h-5 text-amber-400" />
+                <h3 className="text-xl font-bold text-white">Local Cuisine</h3>
+              </div>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-amber-600/20">
+                <h4 className="text-lg font-bold text-amber-200 mb-2">Iconic Tastes of {capsule.name}</h4>
+                <p className="text-slate-300 leading-relaxed">
+                  Food in {capsule.name} is deeply tied to its history and geography. While modern global cuisine is always available, the true heartbeat of the city is found in its traditional dishes, passed down through generations. Street vendors and family-owned restaurants offer the most authentic flavors.
+                </p>
+                <div className="mt-4 p-4 bg-slate-900/50 rounded-xl border border-slate-700">
+                  <p className="text-sm text-slate-400 italic">"The best meals here aren't found in fine dining; they're found where the locals gather after a long day."</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CLOTHING TAB */}
+          {activeTab === 'clothing' && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <Shirt className="w-5 h-5 text-amber-400" />
+                <h3 className="text-xl font-bold text-white">Traditional Attire</h3>
+              </div>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-amber-600/20">
+                <h4 className="text-lg font-bold text-amber-200 mb-2">Textiles of {capsule.name}</h4>
+                <p className="text-slate-300 leading-relaxed">
+                  The clothing styles native to {capsule.name} tell a story of climate, social status, and cultural identity. Traditional garments are often meticulously crafted, featuring bold patterns and materials sourced directly from the surrounding environment. Today, these forms of dress are primarily worn during important ceremonies and festivals.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* TRADITIONS TAB */}
+          {activeTab === 'traditions' && (
+            <div className="space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center gap-3 mb-6">
+                <Flame className="w-5 h-5 text-amber-400" />
+                <h3 className="text-xl font-bold text-white">Customs & Beliefs</h3>
+              </div>
+              <div className="bg-slate-800 p-6 rounded-2xl border border-amber-600/20">
+                <h4 className="text-lg font-bold text-amber-200 mb-2">The Rhythms of {capsule.name}</h4>
+                <p className="text-slate-300 leading-relaxed">
+                  Generations of belief systems converge in {capsule.name}. From seasonal harvest festivals to rites of passage, local traditions are vibrant affairs that involve the entire community. These events often feature specific songs, dances, and specialized crafts that keep the area's heritage vividly alive in the modern era.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* COMMUNITY VOICES TAB */}
           {activeTab === 'community' && (
             <div className="space-y-8 animate-in fade-in duration-300">
-              
+
               {/* Voice Notes */}
               {localVoiceNotes.length > 0 && (
                 <div>
@@ -374,13 +497,12 @@ export function CultureCapsuleModal({
                             <h4 className="font-bold text-white">{vn.author}</h4>
                             <p className="text-xs text-amber-200/60">{vn.date}</p>
                           </div>
-                          <button 
+                          <button
                             onClick={() => handlePlayVoiceNote(vn.id, vn.transcription)}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              isPlayingId === vn.id 
-                              ? 'bg-amber-600 text-slate-900 shadow-[0_0_15px_rgba(217,119,6,0.4)]' 
-                              : 'bg-slate-700 hover:bg-amber-500/20 text-white hover:text-amber-400'
-                            }`}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${isPlayingId === vn.id
+                                ? 'bg-amber-600 text-slate-900 shadow-[0_0_15px_rgba(217,119,6,0.4)]'
+                                : 'bg-slate-700 hover:bg-amber-500/20 text-white hover:text-amber-400'
+                              }`}
                           >
                             {isPlayingId === vn.id ? (
                               <Square className="w-4 h-4 fill-current" />
@@ -389,21 +511,21 @@ export function CultureCapsuleModal({
                             )}
                           </button>
                         </div>
-                        
+
                         {/* Fake Waveform */}
                         <div className="flex items-end gap-[2px] h-8 mb-3 w-full">
                           {Array(40).fill(0).map((_, i) => (
-                            <div 
-                              key={i} 
+                            <div
+                              key={i}
                               className={`flex-1 rounded-sm ${isPlayingId === vn.id ? 'bg-amber-300 animate-pulse' : 'bg-amber-400'} ${i < 15 ? 'opacity-100' : 'opacity-30'}`}
-                              style={{ 
+                              style={{
                                 height: `${Math.max(10, Math.sin(i * 0.5) * 50 + 50)}%`,
                                 animationDelay: `${i * 0.05}s`
                               }}
                             />
                           ))}
                         </div>
-                        
+
                         {(vn.transcription || vn.imageUrl === undefined) && (
                           <p className="italic text-slate-300 text-sm mb-3">
                             "{vn.transcription}"
@@ -434,22 +556,21 @@ export function CultureCapsuleModal({
                       </span>
                     )}
                   </div>
-                  
+
                   <p className="text-amber-200/70 text-sm mb-4">
                     Press and hold the button below to stream a live video feed from your current location directly to the globe backend.
                   </p>
-                  
-                  <button 
+
+                  <button
                     onMouseDown={handleVideoRecordStart}
                     onMouseUp={handleVideoRecordStop}
                     onMouseLeave={() => isVideoRecording && handleVideoRecordStop()}
                     onTouchStart={handleVideoRecordStart}
                     onTouchEnd={handleVideoRecordStop}
-                    className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${
-                      isVideoRecording 
-                      ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50' 
-                      : 'bg-amber-500 text-slate-900 hover:bg-amber-400 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]'
-                    }`}
+                    className={`w-full flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all transform select-none shadow-lg ${isVideoRecording
+                        ? 'bg-red-500 text-white scale-[0.98] shadow-red-500/50'
+                        : 'bg-amber-500 text-slate-900 hover:bg-amber-400 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(245,158,11,0.5)]'
+                      }`}
                   >
                     <Video className={`w-6 h-6 ${isVideoRecording ? 'animate-pulse' : ''}`} />
                     {isVideoRecording ? 'Release to Stop & Send' : 'Hold to Record & Broadcast'}
@@ -483,18 +604,18 @@ export function CultureCapsuleModal({
                     </span>
                   )}
                 </div>
-                
+
                 <textarea
                   value={transcriptionText}
                   onChange={(e) => setTranscriptionText(e.target.value)}
                   placeholder="Click the microphone to start talking, or type your experience..."
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-slate-300 text-sm focus:outline-none focus:border-amber-500 transition-colors mb-4 min-h-[80px]"
                 />
-                
+
                 {selectedImage && (
                   <div className="relative mb-4 rounded-xl overflow-hidden border border-slate-700 h-32 w-32 group">
                     <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
-                    <button 
+                    <button
                       onClick={() => { setSelectedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
                       className="absolute top-2 right-2 bg-black/50 p-1 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
                     >
@@ -502,37 +623,36 @@ export function CultureCapsuleModal({
                     </button>
                   </div>
                 )}
-                
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  capture="environment" 
-                  ref={fileInputRef} 
-                  onChange={handleImageSelect} 
-                  className="hidden" 
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  ref={fileInputRef}
+                  onChange={handleImageSelect}
+                  className="hidden"
                 />
 
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     onClick={() => fileInputRef.current?.click()}
                     className="flex-shrink-0 flex items-center justify-center p-3 rounded-xl border bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800 transition-colors"
                   >
                     <ImagePlus className="w-5 h-5" />
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={toggleRecording}
-                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border font-medium transition-colors ${
-                      isRecording 
-                      ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20' 
-                      : 'bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800'
-                    }`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border font-medium transition-colors ${isRecording
+                        ? 'bg-red-500/10 border-red-500/50 text-red-400 hover:bg-red-500/20'
+                        : 'bg-slate-900 border-amber-600/50 text-amber-400 hover:bg-slate-800'
+                      }`}
                   >
                     <Mic className={`w-5 h-5 ${isRecording ? 'animate-bounce' : ''}`} />
                     {isRecording ? 'Stop Recording' : 'Start Recording'}
                   </button>
-                  
-                  <button 
+
+                  <button
                     onClick={handleSaveVoiceNote}
                     disabled={(!transcriptionText.trim() && !selectedImage) || isRecording}
                     className="flex-1 flex items-center justify-center gap-2 bg-amber-500 text-slate-900 py-3 rounded-xl font-bold hover:bg-amber-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -573,7 +693,7 @@ export function CultureCapsuleModal({
                   <MessageSquare className="w-5 h-5 text-amber-400" />
                   <h3 className="text-xl font-bold text-white">Ask A Local</h3>
                 </div>
-                
+
                 <div className="space-y-4 mb-6">
                   {capsule.questions.map(q => (
                     <div key={q.id} className="bg-slate-800 p-5 rounded-xl border border-slate-700">
@@ -584,7 +704,7 @@ export function CultureCapsuleModal({
                           <p className="text-white font-medium">{q.question}</p>
                         </div>
                       </div>
-                      
+
                       {q.answer && (
                         <>
                           <hr className="border-white/10 my-4" />
@@ -604,8 +724,8 @@ export function CultureCapsuleModal({
                 {/* Input Field */}
                 <div className="flex items-center gap-3 bg-slate-900 border border-white/20 rounded-full py-2 px-4 focus-within:border-amber-500 transition-colors">
                   <MessageSquare className="w-5 h-5 text-slate-400" />
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     placeholder="Leave a question for locals..."
                     className="flex-1 bg-transparent text-white placeholder:text-slate-500 focus:outline-none text-sm"
                   />

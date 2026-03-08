@@ -34,6 +34,105 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [altitude, setAltitude] = useState(2.5);
   const zoomTimeout = useRef<any>(null);
+  const [mergedCapsules, setMergedCapsules] = useState<CultureCapsule[]>(cultureCapsules);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchBackendData() {
+      try {
+        const citiesRes = await fetch('http://127.0.0.1:5000/api/cities');
+        if (!citiesRes.ok) return;
+        const cities = await citiesRes.json();
+        
+        let newCapsules = [...cultureCapsules];
+
+        for (const city of cities) {
+          const sitesRes = await fetch(`http://127.0.0.1:5000/api/sites/city/${encodeURIComponent(city.name)}`);
+          if (!sitesRes.ok) continue;
+          const sites = await sitesRes.json();
+
+          for (const site of sites) {
+            const siteId = site.id;
+            const siteName = site.name;
+            const siteLat = site.latitude || 0.0;
+            const siteLng = site.longitude || 0.0;
+
+            let existingIndex = newCapsules.findIndex(
+              c => c.name.toLowerCase() === String(siteName).toLowerCase() || c.name.toLowerCase() === String(city.name).toLowerCase()
+            );
+
+            const contribsRes = await fetch(`http://127.0.0.1:5000/api/contributions/${siteId}`);
+            let apiStories: any[] = [];
+            if (contribsRes.ok) {
+              const contribs = await contribsRes.json();
+              apiStories = contribs.map((c: any) => {
+                const dateStr = c.created_at ? String(c.created_at).split(' ')[0] : 'Today';
+                return {
+                  id: String(c.id),
+                  author: "Local Explorer",
+                  date: dateStr,
+                  text: c.description
+                };
+              });
+            }
+
+            if (existingIndex !== -1) {
+              const current = newCapsules[existingIndex];
+              let hasNew = false;
+              const updatedStories = [...current.stories];
+              for (const apiStory of apiStories) {
+                if (!updatedStories.some(s => s.id === apiStory.id)) {
+                  updatedStories.push(apiStory);
+                  hasNew = true;
+                }
+              }
+              if (hasNew) {
+                newCapsules[existingIndex] = { ...current, stories: updatedStories };
+              }
+            } else {
+              let shortSummary = "Modern Area";
+              if (site.summary && String(site.summary).length > 15) {
+                shortSummary = String(site.summary).substring(0, 15) + "...";
+              }
+              newCapsules.push({
+                id: String(siteId),
+                name: siteName,
+                country: city.name,
+                lat: siteLat,
+                lng: siteLng,
+                timelinePeriod: shortSummary,
+                capsuleColor: "#4A90E2",
+                perspectives: [
+                  {
+                    role: "AI Summary",
+                    summary: site.summary || `AI Summary for ${siteName}...`
+                  }
+                ],
+                lifeTodayCards: [
+                  {
+                    category: "Life Today",
+                    title: "Modern Life",
+                    content: `Life today in ${siteName}...`
+                  }
+                ],
+                images: ["https://images.unsplash.com/photo-1541339907198-e08756dedf3f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080"],
+                stories: apiStories,
+                voiceNotes: [],
+                questions: []
+              });
+            }
+          }
+        }
+        if (isMounted) {
+          setMergedCapsules([...newCapsules]);
+        }
+      } catch (e) {
+        console.error("Error fetching backend data", e);
+      }
+    }
+    fetchBackendData();
+    return () => { isMounted = false; };
+  }, []);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -135,7 +234,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
       let closestCapsule = null;
       let minDistance = Infinity;
       
-      for (const capsule of cultureCapsules) {
+      for (const capsule of mergedCapsules) {
         const dLat = (capsule.lat - userLocation.lat) * Math.PI / 180;
         const dLon = (capsule.lng - userLocation.lng) * Math.PI / 180;
         const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -223,7 +322,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     if (query.trim().length > 1) {
-      const results = cultureCapsules.filter(city =>
+      const results = mergedCapsules.filter(city =>
         city.name.toLowerCase().includes(query.toLowerCase()) || 
         city.country.toLowerCase().includes(query.toLowerCase())
       );
@@ -295,7 +394,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
           
           // Data pins for hover interactions
           pointsData={[
-            ...cultureCapsules,
+            ...mergedCapsules,
             ...capitalCapsules
           ]}
           pointLat="lat"
@@ -350,7 +449,7 @@ export function Globe3D({ onLocationSelect, selectedLocations = [] }: Globe3DPro
             `;
             return el;
           }}
-          ringsData={isGlowMode ? cultureCapsules : []}
+          ringsData={isGlowMode ? mergedCapsules : []}
           ringLat="lat"
           ringLng="lng"
           ringColor={(d: any) => d.capsuleColor}
